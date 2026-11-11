@@ -564,6 +564,14 @@ if(WIN32)
 	enable_language(RC)
 	# app icon
         list(APPEND DSView_SOURCES applogo.rc)
+	# The native frame window, used on Windows only.
+	list(APPEND DSView_SOURCES
+		DSView/pv/winnativewidget.cpp
+		DSView/pv/winshadow.cpp
+	)
+	list(APPEND DSView_HEADERS
+		DSView/pv/winshadow.h
+	)
 endif()
 
 if(Qt5Core_FOUND)
@@ -651,6 +659,10 @@ add_executable(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} ${DSVIEW_LINK_LIBS})
+
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME} dwmapi)
+endif()
 
 if(WIN32)
 # Pass -mwindows so that no "DOS box" will open when PulseView is started.
