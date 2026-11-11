@@ -17,22 +17,22 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install: >-
             make
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-qt5-base
-            mingw-w64-x86_64-qt5-svg
-            mingw-w64-x86_64-qt5-tools
-            mingw-w64-x86_64-glib2
-            mingw-w64-x86_64-libusb
-            mingw-w64-x86_64-fftw
-            mingw-w64-x86_64-boost
-            mingw-w64-x86_64-zlib
-            mingw-w64-x86_64-python
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-qt5-base
+            mingw-w64-ucrt-x86_64-qt5-svg
+            mingw-w64-ucrt-x86_64-qt5-tools
+            mingw-w64-ucrt-x86_64-glib2
+            mingw-w64-ucrt-x86_64-libusb
+            mingw-w64-ucrt-x86_64-fftw
+            mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-zlib
+            mingw-w64-ucrt-x86_64-python
 
       - name: Configure
         # The executable is always written to ./build.dir by CMakeLists.txt,
@@ -58,10 +58,10 @@ jobs:
           # Qt runtime and plugins.
           windeployqt --release --no-translations --no-compiler-runtime $BIN/DSView.exe
 
-          # The other MinGW DLLs used by the executable and the Qt plugins.
+          # The other MSYS2 DLLs used by the executable and the Qt plugins.
           for i in 1 2; do
             find $BIN -name "*.exe" -o -name "*.dll" | while read -r f; do
-              ldd "$f" | grep -i "/mingw64/" | awk '{print $3}'
+              ldd "$f" | grep -i "/ucrt64/" | awk '{print $3}'
             done | sort -u | while read -r dll; do
               cp -n "$dll" $BIN/
             done
@@ -78,7 +78,7 @@ jobs:
           # the embedded interpreter finds it in ../lib/pythonX.Y.
           PYVER=$(python -c "import sys; print('%d.%d' % sys.version_info[:2])")
           mkdir -p $PKG/lib
-          cp -r /mingw64/lib/python$PYVER $PKG/lib/
+          cp -r /ucrt64/lib/python$PYVER $PKG/lib/
           rm -rf $PKG/lib/python$PYVER/test \
                  $PKG/lib/python$PYVER/site-packages \
                  $PKG/lib/python$PYVER/tkinter \
