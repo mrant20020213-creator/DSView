@@ -38,9 +38,14 @@ jobs:
       - name: Configure
         # The executable is always written to ./build.dir by CMakeLists.txt,
         # so the build tree must use another folder.
+        # Python must be the MSYS2 one, not the Python installed on the runner,
+        # because its DLL and standard library are shipped in the package.
         run: >-
           cmake -G "MSYS Makefiles" -S . -B build
           -DCMAKE_BUILD_TYPE=Release
+          -DPython3_ROOT_DIR="$(cygpath -m /ucrt64)"
+          -DPython3_FIND_REGISTRY=NEVER
+          -DPython3_FIND_STRATEGY=LOCATION
           -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           -DCMAKE_C_FLAGS="-Wno-error=implicit-function-declaration -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
 
@@ -101,6 +106,29 @@ jobs:
                  $PKG/lib/python$PYVER/ensurepip \
                  $PKG/lib/python$PYVER/config-*
           find $PKG/lib -name "__pycache__" -type d -prune -exec rm -rf {} +
+
+      - name: Check package
+        # Every DLL imported by the executable must be in the package or be a system DLL.
+        run: |
+          set -e
+          BIN=dist/DSView/bin
+          missing=0
+          for dll in $(objdump -p $BIN/DSView.exe | grep "DLL Name:" | awk '{print $3}'); do
+            if [ -e "$BIN/$dll" ]; then
+              continue
+            fi
+            case "${dll,,}" in
+              api-ms-win-*|kernel32.dll|user32.dll|gdi32.dll|shell32.dll|advapi32.dll|ole32.dll|msvcrt.dll|dwmapi.dll|ws2_32.dll|setupapi.dll|winmm.dll|oleaut32.dll|comctl32.dll|comdlg32.dll|imm32.dll|version.dll|uxtheme.dll)
+                ;;
+              *)
+                echo "Missing DLL: $dll"
+                missing=1
+                ;;
+            esac
+          done
+          ls $BIN/libpython3*.dll
+          ls dist/DSView/lib/python3*/os.py
+          exit $missing
 
       - uses: actions/upload-artifact@v4
         with:
