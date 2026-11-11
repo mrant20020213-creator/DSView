@@ -27,6 +27,7 @@ jobs:
             mingw-w64-ucrt-x86_64-qt5-base
             mingw-w64-ucrt-x86_64-qt5-svg
             mingw-w64-ucrt-x86_64-qt5-tools
+            mingw-w64-ucrt-x86_64-qt5-winextras
             mingw-w64-ucrt-x86_64-glib2
             mingw-w64-ucrt-x86_64-libusb
             mingw-w64-ucrt-x86_64-fftw
@@ -44,7 +45,8 @@ jobs:
           -DCMAKE_C_FLAGS="-Wno-error=implicit-function-declaration -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
 
       - name: Build
-        run: cmake --build build -j 4
+        # Keep going after an error, so one run reports all the failures.
+        run: cmake --build build -j 4 -- -k
 
       - name: Package
         run: |
