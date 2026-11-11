@@ -50,7 +50,7 @@ jobs:
 
       - name: Package
         run: |
-          set -e
+          set -ex
           PKG=dist/DSView
           BIN=$PKG/bin
           mkdir -p $BIN
@@ -74,9 +74,11 @@ jobs:
           # The Qt runtime and the other MSYS2 DLLs used by the executable and the Qt plugins.
           for i in 1 2; do
             find $BIN -name "*.exe" -o -name "*.dll" | while read -r f; do
-              ldd "$f" | grep -i "/ucrt64/" | awk '{print $3}'
+              ldd "$f" | grep -i "/ucrt64/" | awk '{print $3}' || true
             done | sort -u | while read -r dll; do
-              cp -n "$dll" $BIN/
+              if [ ! -e "$BIN/$(basename "$dll")" ]; then
+                cp "$dll" $BIN/
+              fi
             done
           done
 
