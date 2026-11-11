@@ -57,10 +57,21 @@ jobs:
 
           cp build.dir/DSView.exe $BIN/
 
-          # Qt runtime and plugins.
-          windeployqt --release --no-translations --no-compiler-runtime $BIN/DSView.exe
+          # Qt plugins, Qt looks for them beside the executable.
+          QTPLUG=$( (qmake -query QT_INSTALL_PLUGINS || qmake-qt5 -query QT_INSTALL_PLUGINS) 2>/dev/null || true)
+          if [ -z "$QTPLUG" ] || [ ! -d "$QTPLUG" ]; then
+            QTPLUG=/ucrt64/share/qt5/plugins
+          fi
+          echo "Qt plugins: $QTPLUG"
+          ls "$QTPLUG"
+          for d in platforms styles imageformats iconengines; do
+            mkdir -p $BIN/$d
+            cp "$QTPLUG"/$d/*.dll $BIN/$d/
+          done
+          # The debug plugins are not needed.
+          find $BIN -name "*d.dll" -path "*/platforms/*" -name "qwindowsd.dll" -delete
 
-          # The other MSYS2 DLLs used by the executable and the Qt plugins.
+          # The Qt runtime and the other MSYS2 DLLs used by the executable and the Qt plugins.
           for i in 1 2; do
             find $BIN -name "*.exe" -o -name "*.dll" | while read -r f; do
               ldd "$f" | grep -i "/ucrt64/" | awk '{print $3}'
