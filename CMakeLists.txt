@@ -572,6 +572,9 @@ if(WIN32)
 	list(APPEND DSView_HEADERS
 		DSView/pv/winshadow.h
 	)
+	# This file calls the wide character version of the Windows API.
+	set_source_files_properties(DSView/pv/winnativewidget.cpp
+		PROPERTIES COMPILE_DEFINITIONS "UNICODE;_UNICODE")
 endif()
 
 if(Qt5Core_FOUND)
