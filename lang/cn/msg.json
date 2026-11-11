@@ -393,5 +393,25 @@
     {
         "id": "IDS_MSG_NO_DECODED_RESULT",
         "text": "无可导出的数据!"
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR_DIR",
+        "text": "创建录制文件夹失败!\n请检查录制路径。"
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR",
+        "text": "录制错误"
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR_SLOW",
+        "text": "磁盘写入速度跟不上数据流!\n请降低采样率或减少通道数。"
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR_WRITE",
+        "text": "写入录制文件失败!\n请检查录制路径的剩余空间和写入权限。"
+    },
+    {
+        "id": "IDS_MSG_RECORD_NO_DIR",
+        "text": "请选择一个用于存放录制文件的文件夹。"
     }
 ]

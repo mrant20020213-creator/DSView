@@ -579,6 +579,15 @@ namespace pv
                 _is_stream_mode = true;
             }
 
+            // Record to file needs the device to capture continuously.
+            if (AppConfig::Instance().userHistory.recordEnable
+                    && !instant
+                    && !_device_agent.is_file()
+                    && _is_stream_mode 
+                    && !is_loop_mode()){
+                set_collect_mode(COLLECT_LOOP);
+            }
+
             if (is_loop_mode() && !_is_stream_mode){
                 set_collect_mode(COLLECT_SINGLE); // Reset the capture mode.
             }
@@ -613,6 +622,22 @@ namespace pv
         else
             _is_instant = instant;
 
+        // The last record task may be still writing the remaining data.
+        _recorder.finish();
+        _recorder.wait();
+
+        if (mode == LOGIC 
+                && AppConfig::Instance().userHistory.recordEnable
+                && !_is_instant
+                && is_loop_mode())
+        {
+            if (!start_record()){
+                MsgBox::Show(L_S(STR_PAGE_MSG, S_ID(IDS_MSG_RECORD_ERROR_DIR), 
+                    "Failed to create the record folder!\nPlease check the record path."));
+                return false;
+            }
+        }
+
         _callback->trigger_message(DSV_MSG_START_COLLECT_WORK_PREV);
 
         if (exec_capture())
@@ -629,7 +654,42 @@ namespace pv
             return true;
         }
 
+        _recorder.finish();
+
         return false;
+    }
+
+    bool SigSession::start_record()
+    {
+        AppConfig &app = AppConfig::Instance();
+        RecordOptions opt;
+
+        int segment_mb = app.userHistory.recordSegmentMB;
+        if (segment_mb < 16)
+            segment_mb = 16;
+        if (segment_mb > 2048)
+            segment_mb = 2048;
+
+        opt.dir = app.userHistory.recordDir;
+        opt.segment_bytes = (uint64_t)segment_mb * 1024 * 1024;
+        opt.driver = _device_agent.driver_name().toLocal8Bit().data();
+        opt.device_mode = _device_agent.get_work_mode();
+        opt.samplerate = _device_agent.get_sample_rate();
+        opt.start_time_ms = QDateTime::currentDateTime().toMSecsSinceEpoch();
+
+        for (const GSList *l = _device_agent.get_channels(); l; l = l->next)
+        {
+            sr_channel *const probe = (sr_channel*)l->data;
+
+            if (probe->type == SR_CHANNEL_LOGIC && probe->enabled){
+                RecordChannel ch;
+                ch.index = probe->index;
+                ch.name = probe->name ? probe->name : "";
+                opt.channels.push_back(ch);
+            }
+        }
+
+        return _recorder.start(opt);
     }
 
     bool SigSession::exec_capture()
@@ -1215,6 +1275,16 @@ namespace pv
             return;
         }
 
+        if (_recorder.is_recording())
+        {
+            _recorder.push(o.data, o.length);
+
+            if (_recorder.take_error()){
+                _error = Record_err;
+                _callback->session_error();
+            }
+        }
+
         if (!_is_triged && o.length > 0)
         {
             _is_triged = true;
@@ -1463,6 +1533,7 @@ namespace pv
             _capture_data->get_dso()->capture_ended();
             _capture_data->get_analog()->capture_ended();
             _is_task_end = true;
+            _recorder.finish();
 
             if (packet->status != SR_PKT_OK)
             {
@@ -1886,6 +1957,9 @@ namespace pv
         dsv_info("SigSession::Close(), stop capture");
         stop_capture();
 
+        _recorder.finish();
+        _recorder.wait();
+
         // TODO: This should not be necessary
         _session = NULL;
     }
@@ -2097,6 +2171,7 @@ namespace pv
         case DS_EV_COLLECT_TASK_END_BY_ERROR:
         case DS_EV_COLLECT_TASK_END_BY_DETACHED:
         {
+            _recorder.finish();
             _callback->trigger_message(DSV_MSG_COLLECT_END);
 
             if (_capture_data->get_logic()->last_ended() == false)

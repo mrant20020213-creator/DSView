@@ -394,5 +394,25 @@
     {
         "id": "IDS_MSG_NO_DECODED_RESULT",
         "text": "No data to export!"
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR_DIR",
+        "text": "Failed to create the record folder!\nPlease check the record path."
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR",
+        "text": "Record Error"
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR_SLOW",
+        "text": "The disk is too slow to store the data stream!\nPlease reduce the sample rate or the channels."
+    },
+    {
+        "id": "IDS_MSG_RECORD_ERROR_WRITE",
+        "text": "Failed to write the record file!\nPlease check the free space and write permission of the record path."
+    },
+    {
+        "id": "IDS_MSG_RECORD_NO_DIR",
+        "text": "Please select a folder to store the record files."
     }
 ]

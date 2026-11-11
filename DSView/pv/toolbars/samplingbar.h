@@ -134,6 +134,7 @@ namespace pv
 
         private slots:
             void on_collect_mode();
+            void on_record_options();
             void on_run_stop();
             void on_instant_stop();
             void on_device_selected();
@@ -164,6 +165,7 @@ namespace pv
             QAction             *_action_repeat;
             QAction             *_action_single;
             QAction             *_action_loop;
+            QAction             *_action_record;
         
             DeviceAgent         *_device_agent;
             ds_device_handle    _last_device_handle;

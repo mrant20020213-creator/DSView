@@ -790,5 +790,33 @@
     {
         "id": "IDS_FFT_MODE_LINEARRSM",
         "text": "线性 RMS"
+    },
+    {
+        "id": "IDS_DLG_RECORD_ENABLE",
+        "text": "采集时将数据持续写入文件,直到停止"
+    },
+    {
+        "id": "IDS_DLG_RECORD_DIR",
+        "text": "文件夹: "
+    },
+    {
+        "id": "IDS_DLG_RECORD_BROWSE",
+        "text": "浏览..."
+    },
+    {
+        "id": "IDS_DLG_RECORD_FILE_SIZE",
+        "text": "单个文件大小上限(MB): "
+    },
+    {
+        "id": "IDS_DLG_RECORD_TIP",
+        "text": "仅支持逻辑分析仪的 Stream 模式。采集以滚动模式运行,\n数据按顺序保存为多个 .dsl 文件,存放在新建的子文件夹中。"
+    },
+    {
+        "id": "IDS_DLG_RECORD_TITLE",
+        "text": "录制到文件"
+    },
+    {
+        "id": "IDS_DLG_RECORD_SELECT_DIR",
+        "text": "选择录制文件夹"
     }
 ]

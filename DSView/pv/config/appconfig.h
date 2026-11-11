@@ -116,6 +116,9 @@ struct UserHistory
   QString   openDir;
   QString   protocolExportPath;
   QString   exportFormat;
+  bool      recordEnable;     // Write the logic stream to files while capturing.
+  QString   recordDir;
+  int       recordSegmentMB;  // The max size of each record file.
 };
 
 struct FontParam

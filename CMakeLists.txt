@@ -291,6 +291,8 @@ set(DSView_SOURCES
     DSView/pv/prop/string.cpp
     DSView/pv/dialogs/storeprogress.cpp
     DSView/pv/storesession.cpp
+    DSView/pv/streamrecorder.cpp
+    DSView/pv/dialogs/recordoptions.cpp
     DSView/pv/view/devmode.cpp
     DSView/pv/dialogs/waitingdialog.cpp
     DSView/pv/dialogs/dsomeasure.cpp
@@ -394,6 +396,7 @@ set(DSView_HEADERS
     DSView/pv/prop/string.h
     DSView/pv/dialogs/storeprogress.h
     DSView/pv/storesession.h
+    DSView/pv/dialogs/recordoptions.h
     DSView/pv/view/devmode.h
     DSView/pv/dialogs/waitingdialog.h
     DSView/pv/dialogs/dsomeasure.h

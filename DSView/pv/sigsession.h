@@ -42,6 +42,7 @@
 #include "data/logicsnapshot.h"
 #include "data/analogsnapshot.h"
 #include "data/dsosnapshot.h"
+#include "streamrecorder.h"
  
 struct srd_decoder;
 struct srd_channel;
@@ -140,7 +141,8 @@ public:
         Malloc_err, 
         Test_timeout_err,
         Pkt_data_err,
-        Data_overflow
+        Data_overflow,
+        Record_err
     };
 
 private:
@@ -150,6 +152,10 @@ public:
     explicit SigSession();
 
 	~SigSession(); 
+
+    inline StreamRecorder* get_recorder(){
+        return &_recorder;
+    }
 
     inline DeviceAgent* get_device(){
         return &_device_agent;
@@ -465,6 +471,7 @@ private:
     void math_disable();
 
     bool exec_capture();
+    bool start_record();
     void exit_capture();
 
     inline void data_updated(){
@@ -591,6 +598,7 @@ private:
     bool        _hw_replied;
 
     SESSION_ERROR_STATUS _error;
+    StreamRecorder  _recorder;
     uint64_t    _error_pattern;
     int         _map_zoom;  
     bool        _bClose;  

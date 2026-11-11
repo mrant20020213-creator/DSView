@@ -260,6 +260,9 @@ static void _loadHistory(UserHistory &o, QSettings &st)
     getFiled("openDir", st, o.openDir, ""); 
     getFiled("protocolExportPath", st, o.protocolExportPath, ""); 
     getFiled("exportFormat", st, o.exportFormat, ""); 
+    getFiled("recordEnable", st, o.recordEnable, false);
+    getFiled("recordDir", st, o.recordDir, "");
+    getFiled("recordSegmentMB", st, o.recordSegmentMB, 1024);
     st.endGroup();
 }
  
@@ -274,6 +277,9 @@ static void _saveHistory(UserHistory &o, QSettings &st)
     setFiled("openDir", st, o.openDir); 
     setFiled("protocolExportPath", st, o.protocolExportPath);
     setFiled("exportFormat", st, o.exportFormat); 
+    setFiled("recordEnable", st, o.recordEnable);
+    setFiled("recordDir", st, o.recordDir);
+    setFiled("recordSegmentMB", st, o.recordSegmentMB);
     st.endGroup();
 }
 

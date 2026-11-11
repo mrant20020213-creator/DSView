@@ -405,6 +405,19 @@ namespace pv
             details = L_S(STR_PAGE_MSG, S_ID(IDS_MSG_DATA_OVERFLOW_DET), 
                       "USB bandwidth can not support current sample rate! \nPlease reduce the sample rate!");
             break;
+        case SigSession::Record_err:
+            dsv_info("MainWindow::on_session_error(),Record_err, stop capture");
+            _session->stop_capture();
+            title = L_S(STR_PAGE_MSG, S_ID(IDS_MSG_RECORD_ERROR), "Record Error");
+            if (_session->get_recorder()->error() == StreamRecorder::ERR_QUEUE_OVERFLOW){
+                details = L_S(STR_PAGE_MSG, S_ID(IDS_MSG_RECORD_ERROR_SLOW), 
+                      "The disk is too slow to store the data stream!\nPlease reduce the sample rate or the channels.");
+            }
+            else{
+                details = L_S(STR_PAGE_MSG, S_ID(IDS_MSG_RECORD_ERROR_WRITE), 
+                      "Failed to write the record file!\nPlease check the free space and write permission of the record path.");
+            }
+            break;
         default:
             title = L_S(STR_PAGE_MSG, S_ID(IDS_MSG_UNDEFINED_ERROR), "Undefined Error");
             details = L_S(STR_PAGE_MSG, S_ID(IDS_MSG_UNDEFINED_ERROR_DET), "Not expected error!");

@@ -1,0 +1,93 @@
+name: Windows build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            make
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-qt5-base
+            mingw-w64-x86_64-qt5-svg
+            mingw-w64-x86_64-qt5-tools
+            mingw-w64-x86_64-glib2
+            mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-fftw
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-python
+
+      - name: Configure
+        # The executable is always written to ./build.dir by CMakeLists.txt,
+        # so the build tree must use another folder.
+        run: >-
+          cmake -G "MSYS Makefiles" -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          -DCMAKE_C_FLAGS="-Wno-error=implicit-function-declaration -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
+
+      - name: Build
+        run: cmake --build build -j 4
+
+      - name: Package
+        run: |
+          set -e
+          PKG=dist/DSView
+          BIN=$PKG/bin
+          mkdir -p $BIN
+
+          cp build.dir/DSView.exe $BIN/
+
+          # Qt runtime and plugins.
+          windeployqt --release --no-translations --no-compiler-runtime $BIN/DSView.exe
+
+          # The other MinGW DLLs used by the executable and the Qt plugins.
+          for i in 1 2; do
+            find $BIN -name "*.exe" -o -name "*.dll" | while read -r f; do
+              ldd "$f" | grep -i "/mingw64/" | awk '{print $3}'
+            done | sort -u | while read -r dll; do
+              cp -n "$dll" $BIN/
+            done
+          done
+
+          # On Windows the application looks for its data beside the executable.
+          cp -r DSView/res $BIN/
+          cp -r DSView/demo $BIN/
+          cp -r lang $BIN/
+          cp -r libsigrokdecode4DSL/decoders $BIN/
+          cp NEWS25 NEWS31 ug25.pdf ug31.pdf $BIN/
+
+          # The Python standard library used by the protocol decoders,
+          # the embedded interpreter finds it in ../lib/pythonX.Y.
+          PYVER=$(python -c "import sys; print('%d.%d' % sys.version_info[:2])")
+          mkdir -p $PKG/lib
+          cp -r /mingw64/lib/python$PYVER $PKG/lib/
+          rm -rf $PKG/lib/python$PYVER/test \
+                 $PKG/lib/python$PYVER/site-packages \
+                 $PKG/lib/python$PYVER/tkinter \
+                 $PKG/lib/python$PYVER/idlelib \
+                 $PKG/lib/python$PYVER/ensurepip \
+                 $PKG/lib/python$PYVER/config-*
+          find $PKG/lib -name "__pycache__" -type d -prune -exec rm -rf {} +
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DSView-windows-x64
+          path: dist/DSView

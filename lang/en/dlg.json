@@ -790,5 +790,33 @@
     {
         "id": "IDS_FFT_MODE_LINEARRSM",
         "text": "Linear RMS"
+    },
+    {
+        "id": "IDS_DLG_RECORD_ENABLE",
+        "text": "Write the captured data to files until stopped"
+    },
+    {
+        "id": "IDS_DLG_RECORD_DIR",
+        "text": "Folder: "
+    },
+    {
+        "id": "IDS_DLG_RECORD_BROWSE",
+        "text": "Browse..."
+    },
+    {
+        "id": "IDS_DLG_RECORD_FILE_SIZE",
+        "text": "Max file size(MB): "
+    },
+    {
+        "id": "IDS_DLG_RECORD_TIP",
+        "text": "Only for logic analyzer in stream mode. The capture runs in loop mode,\nthe data is saved as a sequence of .dsl files in a new sub folder."
+    },
+    {
+        "id": "IDS_DLG_RECORD_TITLE",
+        "text": "Record to Files"
+    },
+    {
+        "id": "IDS_DLG_RECORD_SELECT_DIR",
+        "text": "Select the record folder"
     }
 ]

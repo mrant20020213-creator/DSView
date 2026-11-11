@@ -31,6 +31,7 @@
 #include "../dialogs/dsmessagebox.h"
 #include "../view/dsosignal.h"
 #include "../dialogs/interval.h"
+#include "../dialogs/recordoptions.h"
 #include "../config/appconfig.h"
 #include "../dsvdef.h"
 #include "../log.h"
@@ -117,6 +118,11 @@ namespace pv
             _mode_menu->addAction(_action_single);
             _mode_menu->addAction(_action_repeat);
             _mode_menu->addAction(_action_loop);
+            _action_record = new QAction(this);
+            _action_record->setCheckable(true);
+            _action_record->setChecked(AppConfig::Instance().userHistory.recordEnable);
+            _mode_menu->addSeparator();
+            _mode_menu->addAction(_action_record);
             _mode_button.setMenu(_mode_menu);
 
             _mode_button.setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
@@ -137,6 +143,7 @@ namespace pv
             connect(_action_single, SIGNAL(triggered()), this, SLOT(on_collect_mode()));
             connect(_action_repeat, SIGNAL(triggered()), this, SLOT(on_collect_mode()));
             connect(_action_loop, SIGNAL(triggered()), this, SLOT(on_collect_mode()));
+            connect(_action_record, SIGNAL(triggered()), this, SLOT(on_record_options()));
             connect(&_sample_rate, SIGNAL(currentIndexChanged(int)), this, SLOT(on_samplerate_sel(int)));
 
             ADD_UI(this);
@@ -208,6 +215,7 @@ namespace pv
             _action_single->setText(L_S(STR_PAGE_TOOLBAR, S_ID(IDS_TOOLBAR_CAPTURE_MODE_SINGLE), "&Single"));
             _action_repeat->setText(L_S(STR_PAGE_TOOLBAR, S_ID(IDS_TOOLBAR_CAPTURE_MODE_REPEAT), "&Repetitive"));
             _action_loop->setText(L_S(STR_PAGE_TOOLBAR, S_ID(IDS_TOOLBAR_CAPTURE_MODE_LOOP), "&Loop"));
+            _action_record->setText(L_S(STR_PAGE_TOOLBAR, S_ID(IDS_TOOLBAR_CAPTURE_RECORD), "Record to &Files..."));
         }
 
         void SamplingBar::reStyle()
@@ -1020,6 +1028,8 @@ namespace pv
 
             _action_loop->setVisible(false);
 
+            _action_record->setVisible(false);
+
             int mode = _device_agent->get_work_mode();
             if (mode == LOGIC)
             {
@@ -1039,6 +1049,7 @@ namespace pv
 
                     if (_device_agent->is_stream_mode() || _device_agent->is_demo())
                         _action_loop->setVisible(true);
+                        _action_record->setVisible(true);
                 }
                 _run_stop_action->setVisible(true);
                 _instant_action->setVisible(true);      
@@ -1114,6 +1125,28 @@ namespace pv
             update_mode_icon();
         }
 
+        void SamplingBar::on_record_options()
+        {
+            pv::dialogs::RecordOptionsDlg dlg(this);
+            dlg.exec();
+
+            bool bEnable = AppConfig::Instance().userHistory.recordEnable;
+            _action_record->setChecked(bEnable);
+
+            // The record task works in loop mode.
+            if (dlg.is_done() && bEnable)
+            {
+                _session->set_collect_mode(COLLECT_LOOP);
+
+                if (_device_agent->is_demo()){
+                    _device_agent->set_config_string(SR_CONF_PATTERN_MODE, "random");
+                    _session->broadcast_msg(DSV_MSG_DEMO_OPERATION_MODE_CHNAGED);
+                }
+
+                update_mode_icon();
+            }
+        }
+
         void SamplingBar::update_device_list()
         {
             struct ds_device_base_info *array = NULL;
@@ -1178,6 +1211,7 @@ namespace pv
             _configure_button.setEnabled(bEnable);
             _device_selector.setEnabled(bEnable);
             _action_loop->setVisible(false);
+            _action_record->setVisible(false);
 
             if (_session->get_device()->is_file()){
                 _sample_rate.setEnabled(false);
@@ -1210,6 +1244,7 @@ namespace pv
                 if (mode == LOGIC && _device_agent->is_file() == false){
                     if (_device_agent->is_stream_mode() || _device_agent->is_demo())
                         _action_loop->setVisible(true);
+                        _action_record->setVisible(true);
                 }                
             }
 
