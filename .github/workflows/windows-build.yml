@@ -43,6 +43,7 @@ jobs:
         run: >-
           cmake -G "MSYS Makefiles" -S . -B build
           -DCMAKE_BUILD_TYPE=Release
+          -DDSV_DEBUG_SYMBOLS=ON
           -DPython3_ROOT_DIR="$(cygpath -m /ucrt64)"
           -DPython3_FIND_REGISTRY=NEVER
           -DPython3_FIND_STRATEGY=LOCATION

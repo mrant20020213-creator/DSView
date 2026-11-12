@@ -624,6 +624,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 add_compile_options(-O3)
 
+# Keep the debug symbols, so a crash address can be mapped to the source line.
+if(DSV_DEBUG_SYMBOLS)
+	add_compile_options(-g)
+endif()
+
 #===============================================================================
 #= Linker Configuration
 #-------------------------------------------------------------------------------
